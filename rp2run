@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Loads the given file to the RP2 and runs it in the REPL
+
+set -e
+RSHELL_ARGS="--quiet"
+
+FILE="$1"
+if [ "$FILE" = "" ]; then
+    echo "Syntax $0 file.py"
+    exit 2
+fi
+BASE=$(basename "$FILE")
+
+rshell $RSHELL_ARGS cp "$FILE" "/pyboard/$BASE"
+rshell $RSHELL_ARGS "repl ~ exec(open('$BASE').read())"

@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Loads the mirror code to the pico and runs it
+
+set -e
+RSHELL_ARGS="--quiet"
+
+# rshell $RSHELL_ARGS cp mirror.py "/pyboard/$BASE"
+# rshell $RSHELL_ARGS cp modes/*.py "/pyboard/$BASE/modes/"
+
+rshell $RSHELL_ARGS <<EOF
+cp mirror.py /pyboard/
+#mkdir /pyboard/modes
+cp modes/*.py /pyboard/modes/
+#repl ~ exec(open('mirror.py').read())
+EOF
+
+rshell $RSHELL_ARGS "repl ~ exec(open('mirror.py').read())"
