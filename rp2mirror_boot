@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# Sets the mirror code to boot - see the README for how to undo this!
+
+set -e
+RSHELL_ARGS="--quiet"
+
+rshell $RSHELL_ARGS <<EOF
+cp /pyboard/mirror.py /pyboard/main.py
+EOF
+
+rshell $RSHELL_ARGS "repl ~ exec(open('main.py').read())"
