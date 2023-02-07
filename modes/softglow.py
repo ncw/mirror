@@ -43,7 +43,7 @@ class Mode:
             self.state += 1
             self.delay = 25
         else:
-            brightness = self.mirror.knob(0)
+            brightness = self.mirror.knob_brightness()
             for i in range(self.mirror.n):
                 self.mirror[i] = self.scol(self.t+0.05*i, brightness)
             self.t += 0.003

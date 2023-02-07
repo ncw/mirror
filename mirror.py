@@ -10,7 +10,7 @@ import modes
 # Constants
 nleds = 34
 pin = Pin(0)
-update_freq_hz = 50             # how often we update the LEDs
+update_freq_hz = 25             # how often we update the LEDs
 
 # ADC guard band
 adc_min = 512
@@ -22,6 +22,12 @@ buttons = (
     Pin(21, Pin.IN, Pin.PULL_UP),
 )
 
+# Where to save the current state
+state_file = "state.txt"
+
+# Wait this long before saving the file after changes
+save_after_delay = update_freq_hz * 5
+
 class Mirror:
     """
     Infinity Mirror with LEDs
@@ -32,9 +38,10 @@ class Mirror:
         self.n = nleds
         self.adc = [ machine.ADC(i) for i in range (4) ]
         self.mode = None
-        self.set_mode(len(modes.MODES)-1)
+        self.load_state()
         self.buttons_state = [1, 1]
         self.buttons_pressed = [False, False]
+        self.save_counter = 0
     def __setitem__(self, index, value):
         """
         We use mirror[0] = color to set colours
@@ -63,14 +70,18 @@ class Mirror:
 
         Returns the desired delay
         """
-        delay = self.mode.update()
+        self.mode.update()
         self._leds.write()
         self.read_buttons()
         if self.buttons_pressed[0]:
             self.set_mode(self.mode_number + 1)
         elif self.buttons_pressed[1]:
             self.set_mode(self.mode_number - 1)
-        return delay
+        # Save the state after it has stopped changing
+        if self.save_counter > 0:
+            self.save_counter -= 1
+            if self.save_counter == 0:
+                self.save_state()
     def knob(self, i):
         """
         Read the ADC as a floating point number 0..1
@@ -82,6 +93,21 @@ class Mirror:
         if x > 1.0:
             x = 1.0
         return x
+    def knob_brightness(self):
+        """
+        Brightness knob
+        """
+        return self.knob(0)
+    def knob_hue(self):
+        """
+        Hue knob
+        """
+        return self.knob(1)
+    def knob_speed(self):
+        """
+        Speed knob
+        """
+        return self.knob(2)
     def set_mode(self, i):
         """
         Runs the mode given
@@ -90,18 +116,49 @@ class Mirror:
         self.mode_number = i
         self.mode = modes.MODES[i](self)
         print(self.mode.NAME)
+        self.save_counter = save_after_delay
+    def load_state(self):
+        """
+        Load the state from a file
+        """
+        mode = 0
+        try:
+            with open(state_file) as f:
+                mode = int(f.read())
+        except Exception as e:
+            print("Error reading file", e)
+        self.saved_state = mode
+        print("Loaded state")
+        self.set_mode(mode)
+    def save_state(self):
+        """
+        Save the state to a file
+        """
+        if self.saved_state == self.mode_number:
+            return
+        try:
+            with open(state_file, "w") as f:
+                f.write(str(self.mode_number))
+        except Exception as e:
+            print("Error writing file", e)
+        self.saved_state = self.mode_number
+        print("Saved state")
 
 def main():
     mirror = Mirror()
-    # Update the mirror off a timer interrupt
-    timer = Timer()
-    timer.init(freq=update_freq_hz, mode=Timer.PERIODIC, callback=mirror.update)
-    try:
-        while True:
-            time.sleep(1)
-    except:
-        timer.deinit()
-        raise
+    # Update the mirror at update_freq_hz
+    tick_interval = int(1000/update_freq_hz)
+    next_tick = time.ticks_add(time.ticks_ms(), tick_interval)
+    while True:
+        mirror.update()
+        now = time.ticks_ms()
+        sleep_time = time.ticks_diff(next_tick, now)
+        if sleep_time < 0:
+            print("Dropped frame by", -sleep_time, "ms")
+            next_tick = now
+        else:
+            time.sleep_ms(sleep_time)
+        next_tick = time.ticks_add(next_tick, tick_interval)
 
 if __name__ == "__main__":
     main()

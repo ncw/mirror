@@ -15,21 +15,19 @@ class Mode:
         """
         if random.random() < 0.3:
             # Red range from actual LEDs
-            #h = random.uniform(0.99, 1.0)
-            h = 1.0
+            h = random.uniform(0.0, 0.04)
             s = 1.0
         else:
             # Green range from actual LEDs
             h = random.uniform(0.25, 0.33)
-            # s = random.uniform(0.7, 1.0)
             s = 1.0
         return (h, s, 1.0)
     def update(self):
         """
         Update mirror with the current state
         """
-        brightness = self.mirror.knob(0)
-        speed = self.mirror.knob(2)*2.5+0.5
+        brightness = self.mirror.knob_brightness()
+        speed = self.mirror.knob_speed()*2.5+0.5
         for i in range(self.mirror.n):
             h, s, v = self.hsv[i]
             v = brightness * (sin(self.angle[i])**2)

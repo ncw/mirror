@@ -8,7 +8,7 @@ class Mode:
         """
         Update mirror with the current state
         """
-        h, s, v = self.mirror.knob(2), self.mirror.knob(1), self.mirror.knob(0)
+        h, s, v = self.mirror.knob_hue(), self.mirror.knob_speed(), self.mirror.knob_brightness()
         r, g, b = hsv_to_rgb(h, s, v)
         self.mirror.fill(byte_scale_rgb((r, g, b)))
         #print("r=%5.2f g=%5.2f b=%5.2f h=%5.2f s=%5.2f v=%5.2f" % (r, b, g, h, s, v))

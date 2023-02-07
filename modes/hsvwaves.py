@@ -22,8 +22,8 @@ class Mode:
         """
         Update mirror with the current state
         """
-        brightness = self.mirror.knob(0)
-        speed = self.mirror.knob(1)*0.01
+        brightness = self.mirror.knob_brightness()
+        speed = self.mirror.knob_speed()*0.01
         for i in range(self.mirror.n):
             self.mirror[i] = self.hsv(0.02*i, brightness)
         self.h_angle += self.h_multiplier * speed

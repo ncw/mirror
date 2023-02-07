@@ -19,7 +19,7 @@ height = 504
 
 led_width = 5
 
-update_freq_hz = 50             # how often we update the LEDs
+update_freq_hz = 25             # how often we update the LEDs
     
 class LED:
     """
@@ -91,6 +91,21 @@ class Mirror:
         Reads the value of knob i as 0..1
         """
         return self._knob[i]
+    def knob_brightness(self):
+        """
+        Brightness knob
+        """
+        return self.knob(0)
+    def knob_hue(self):
+        """
+        Hue knob
+        """
+        return self.knob(1)
+    def knob_speed(self):
+        """
+        Speed knob
+        """
+        return self.knob(2)
     def add_knob(self, i, delta):
         """
         Changes the value of knob i by delta
@@ -118,6 +133,10 @@ class Mirror:
             self.set_mode(self.mode_number - 1)
 
 def main():
+    print("Click LEFT, RIGHT to change mode")
+    print("Mouse wheel to change brightness (knob 0)")
+    print("SHIFT mouse wheel for hue (knob 1)")
+    print("CTRL mouse wheel for speed (knob 2)")
     pygame.init()
     size = (width, height)
     screen = pygame.display.set_mode(size)

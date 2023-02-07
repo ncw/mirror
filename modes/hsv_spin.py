@@ -10,9 +10,9 @@ class Mode:
         """
         Update mirror with the current state
         """
-        v = self.mirror.knob(0)
-        s = self.mirror.knob(1)
-        speed = self.mirror.knob(2)
+        v = self.mirror.knob_brightness()
+        s = self.mirror.knob_hue()
+        speed = self.mirror.knob_speed()
         speed = speed*speed*0.1
         for i in range(self.mirror.n):
             h = i / self.mirror.n + self.t

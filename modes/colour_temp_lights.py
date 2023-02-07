@@ -40,7 +40,7 @@ class Mode:
         """
         Update mirror with the current state
         """
-        k, _, v = self.mirror.knob(2)*(max_temp-min_temp)+min_temp, self.mirror.knob(1), self.mirror.knob(0)
+        k, v = self.mirror.knob_hue()*(max_temp-min_temp)+min_temp, self.mirror.knob_brightness()
         r, g, b = k_to_rgb(k)
         self.mirror.fill((int(r*v), int(g*v), int(b*v)))
         #print("k=%8.1f r=%3d g=%3d b=%3d" % (k, r, b, g))
