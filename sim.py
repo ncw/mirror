@@ -3,6 +3,7 @@
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
+#import pygame.gfxdraw
 import time
 import modes
 
@@ -28,15 +29,36 @@ class LED:
     def __init__(self, pos):
         self.pos = pos
         self.x, self.y = pos
-    def circle(self, surface, col, width):
+        center_x = width/2
+        center_y = height/2
+        self.dx = (center_x - self.x)/32
+        self.dy = (center_y - self.y)/32
+        #print(self.dx, self.dy)
+    def circle(self, surface, col, width, offset_x=0, offset_y=0):
         img = pygame.Surface((width, width))
         pygame.draw.circle(img, col, (width/2, width/2), width/2)
-        surface.blit(img, (self.x - width/2, self.y - width/2), special_flags=pygame.BLEND_ADD)
+        w = int(width/2+0.5)
+        #pygame.gfxdraw.filled_circle(img, w, w, w-1, col)
+        #pygame.gfxdraw.aacircle(img, w, w, w, col)
+        surface.blit(img, (self.x - width/2 + offset_x, self.y - width/2 + offset_y), special_flags=pygame.BLEND_ADD)
     def draw(self, surface, col):
-        self.circle(surface, col, led_width*1.6) # exaggerate LED size
+        size = 1.0
+        gap = 10*size
+        brightness = 1.0
         r, g, b = col
-        self.circle(surface, (r*0.1, g*0.1, b*0.1), 30*led_width)
-        self.circle(surface, (r*0.05, g*0.05, b*0.05), height/2)
+        diffuse_width = width
+        diffuse_brightness = 0.04
+        # Can see 24 LEDs deep
+        # Draw an LED and a diffuse beam for each LED
+        for i in range(24):
+            self.circle(surface, (brightness*r, brightness*g, brightness*b), led_width*size*1.4, offset_x=i*self.dx, offset_y=i*self.dy)
+            if i % 4 == 0:
+                self.circle(surface, (r*brightness*diffuse_brightness, g*brightness*diffuse_brightness, b*brightness*diffuse_brightness), diffuse_width*size, offset_x=i*self.dx, offset_y=i*self.dy)
+                #self.circle(surface, (r*diffuse_brightness, g*diffuse_brightness, b*diffuse_brightness), diffuse_width*size, offset_x=i*self.dx, offset_y=i*self.dy)
+            size *= 0.95
+            brightness *= 0.90
+        #self.circle(surface, (r*0.1, g*0.1, b*0.1), 30*led_width)
+        #self.circle(surface, (r*0.05, g*0.05, b*0.05), height/2)
 
 class Mirror:
     """
@@ -179,6 +201,7 @@ def main():
         dt = time.time() - start
         delay = 1.0/update_freq_hz - dt
         if delay < 0:
+            #print(f"Dropped frame by {-delay*1000:.2f}ms")
             delay = 0
         time.sleep(delay)
 
