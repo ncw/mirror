@@ -24,4 +24,7 @@ MODES.append(Mode)
 from .temperature import Mode
 MODES.append(Mode)
 
+from .time import Mode
+MODES.append(Mode)
+
 del Mode
