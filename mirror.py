@@ -6,11 +6,17 @@ import time
 from machine import Pin, Timer
 from neopixel import NeoPixel
 import modes
+import secrets
+import network
+import ntptime
 
 # Constants
 nleds = 34
 pin = Pin(0)
 update_freq_hz = 25             # how often we update the LEDs
+
+# TZ is the base timezone offset from UTC in hours, 0 for UK, 1 for Europe etc.
+TZ = 0
 
 # ADC guard band
 adc_min = 512
@@ -28,6 +34,26 @@ state_file = "state.txt"
 # Wait this long before saving the file after changes
 save_after_delay = update_freq_hz * 5
 
+def local_time_offset():
+    """
+    Return the daylight savings time offset in hours for UK & Europe.
+
+    This is incorrect for US.
+
+    Adapted from: https://forum.micropython.org/viewtopic.php?f=2&t=4034 by JumpZero
+    """
+    year = time.localtime()[0]              # get current year
+    HHMarch   = time.mktime((year,3 ,(31-(int(5*year/4+4))%7),1,0,0,0,0,0)) # Time of March change to Summer Time
+    HHOctober = time.mktime((year,10,(31-(int(5*year/4+1))%7),1,0,0,0,0,0)) # Time of October change to Winter Time
+    now = time.time()
+    if now < HHMarch :                    # we are before last sunday of March
+        offset = 0
+    elif now < HHOctober :                # we are before last sunday of October
+        offset = 1
+    else:                                 # we are after last sunday of October
+        offset = 0
+    return offset
+
 class Mirror:
     """
     Infinity Mirror with LEDs
@@ -43,6 +69,11 @@ class Mirror:
         self.buttons_pressed = [False, False]
         self.save_counter = 0
         self.temp = None
+        self.wlan = network.WLAN(network.STA_IF)
+        self.wlan.active(True)
+        self.wlan.connect(secrets.SSID, secrets.PASSWORD)
+        self.time_set = False
+        self.time_offset = 0
     def __setitem__(self, index, value):
         """
         We use mirror[0] = color to set colours
@@ -50,6 +81,13 @@ class Mirror:
         if index < 0 or index >= self.n:
             return
         self._leds[index] = value
+    def __getitem__(self, index):
+        """
+        Read the value set back
+        """
+        if index < 0 or index >= self.n:
+            return (0,0,0)
+        return self._leds[index]
     def fill(self, col):
         """
         Set all the LEDs to col
@@ -83,6 +121,25 @@ class Mirror:
             self.save_counter -= 1
             if self.save_counter == 0:
                 self.save_state()
+        # Set the time if unset
+        if not self.time_set and self.wlan.isconnected():
+            try:
+                ntptime.settime()
+            except Exception as e:
+                print("Failed to set time:", e)
+                return
+            self.time_set = True
+            self.time_offset = local_time_offset() + TZ*3600
+            print("UTC Time:   %s" % (time.localtime(),))
+            print("Local Time: %s" % (self.local_time(),))
+    def local_time(self):
+        """
+        Returns the broken down local time
+        """
+        if not self.time_set:
+            return (2023, 1, 1, 0, 0, 0, 0, 0, 0)
+        now = time.time()
+        return time.localtime(now+self.time_offset)
     def knob(self, i):
         """
         Read the ADC as a floating point number 0..1

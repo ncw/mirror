@@ -174,5 +174,15 @@ diode drop, so any silicon diode should be fine.
 - So via a diode connect external 5V PSU to VSYS
 - Leave VBUS unconnected (since it connects directly to the USB power)
 
+## WLAN
 
+You will need to make a file called `secrets.py` to make the WLAN work
+with the contents:
+
+```
+SSID = "your access point SSID"
+PASSWORD = "you access point password"
+```
+
+This file isn't checked in to the repo and is in `.gitignore`.
 

@@ -6,6 +6,7 @@ import pygame
 #import pygame.gfxdraw
 import time
 import modes
+import math
 
 # Dimensions measured from the mirror in mm
 # The infinity mirror has 34 LEDs, 11 up each side and 6 on top and bottom
@@ -34,6 +35,13 @@ class LED:
         self.dx = (center_x - self.x)/32
         self.dy = (center_y - self.y)/32
         #print(self.dx, self.dy)
+        # Print angle of each LED in degrees
+        # angle = 270-360*math.atan2(-self.dy, self.dx)/(2*math.pi)
+        # if angle < 0:
+        #     angle += 360
+        # if angle >= 360:
+        #     angle -= 360
+        # print("%.1f" % angle)
     def circle(self, surface, col, width, offset_x=0, offset_y=0):
         img = pygame.Surface((width, width))
         pygame.draw.circle(img, col, (width/2, width/2), width/2)
@@ -90,6 +98,13 @@ class Mirror:
         if index < 0 or index >= self.n:
             return
         self._cols[index] = value
+    def __getitem__(self, index):
+        """
+        Read the value set back
+        """
+        if index < 0 or index >= self.n:
+            return (0,0,0)
+        return self._cols[index]
     def fill(self, col):
         """
         Set all the LEDs to col
@@ -158,6 +173,11 @@ class Mirror:
             self.set_mode(self.mode_number + 1)
         elif i == 1:
             self.set_mode(self.mode_number - 1)
+    def local_time(self):
+        """
+        Returns the broken down local time
+        """
+        return time.localtime()
 
 def main():
     print("Click LEFT, RIGHT to change mode")
