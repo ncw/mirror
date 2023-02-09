@@ -21,4 +21,7 @@ MODES.append(Mode)
 from .christmas import Mode
 MODES.append(Mode)
 
+from .temperature import Mode
+MODES.append(Mode)
+
 del Mode

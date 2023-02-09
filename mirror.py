@@ -36,12 +36,13 @@ class Mirror:
         self._leds = NeoPixel(pin, nleds)
         self._leds.ORDER = (0, 1, 2, 3) # R G B W
         self.n = nleds
-        self.adc = [ machine.ADC(i) for i in range (4) ]
+        self.adc = [ machine.ADC(i) for i in range (5) ]
         self.mode = None
         self.load_state()
         self.buttons_state = [1, 1]
         self.buttons_pressed = [False, False]
         self.save_counter = 0
+        self.temp = None
     def __setitem__(self, index, value):
         """
         We use mirror[0] = color to set colours
@@ -108,6 +109,18 @@ class Mirror:
         Speed knob
         """
         return self.knob(2)
+    def temperature(self):
+        """
+        Return the temperature of the board in C as a floating point number
+        """
+        volts = 3.3 * self.adc[4].read_u16() / 65536
+        temp = 27 - (volts - 0.706)/0.001721
+        if self.temp is None:
+            self.temp = temp
+        else:
+            # Low pass the temperature with a time constant of approx one second
+            self.temp = (self.temp * (update_freq_hz - 1) + temp) / update_freq_hz
+        return self.temp
     def set_mode(self, i):
         """
         Runs the mode given

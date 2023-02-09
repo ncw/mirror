@@ -80,7 +80,7 @@ class Mirror:
         self._leds = leds
         self.n = len(leds)
         self._cols = [ (0,0,0) ] * self.n
-        self._knob = [0.5, 0.5, 0.5]
+        self._knob = [0.5, 0.5, 0.5, 0.6]
         self.mode = None
         self.set_mode(0)
     def __setitem__(self, index, value):
@@ -128,6 +128,11 @@ class Mirror:
         Speed knob
         """
         return self.knob(2)
+    def temperature(self):
+        """
+        Return the temperature of the board in C as a floating point number
+        """
+        return self.knob(3)*34
     def add_knob(self, i, delta):
         """
         Changes the value of knob i by delta
@@ -159,6 +164,7 @@ def main():
     print("Mouse wheel to change brightness (knob 0)")
     print("SHIFT mouse wheel for hue (knob 1)")
     print("CTRL mouse wheel for speed (knob 2)")
+    print("SHIFT+CTRL mouse wheel for temperature")
     pygame.init()
     size = (width, height)
     screen = pygame.display.set_mode(size)
@@ -182,7 +188,9 @@ def main():
                     control_pressed = (e.type == pygame.KEYDOWN)
             if e.type == pygame.MOUSEBUTTONDOWN:
                 knob_number = 0
-                if shift_pressed:
+                if shift_pressed and control_pressed:
+                    knob_number = 3
+                elif shift_pressed:
                     knob_number = 1
                 elif control_pressed:
                     knob_number = 2
