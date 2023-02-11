@@ -4,7 +4,7 @@ This is code to run the LEDs in an infinity mirror while running on a
 Raspberry Pi Pico-W. It also contains a simulator for creating new
 display modes.
 
-**FIXME** needs pictures!
+![Infinity Mirror](images/mirror.gif?raw=true "Infinity Mirror")
 
 The main files are as follows
 
