@@ -1,5 +1,14 @@
 MODES = []
 
+from .prey import Mode
+MODES.append(Mode)
+
+from .chasergb import Mode
+MODES.append(Mode)
+
+from .matrix import Mode
+MODES.append(Mode)
+
 from .colour_temp_lights import Mode
 MODES.append(Mode)
 
