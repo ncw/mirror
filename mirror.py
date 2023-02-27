@@ -80,7 +80,8 @@ class Mirror:
         """
         if index < 0 or index >= self.n:
             return
-        self._leds[index] = value
+        r, g, b = value
+        self._leds[index] = (int(r), int(g), int(b))
     def __getitem__(self, index):
         """
         Read the value set back
