@@ -36,4 +36,16 @@ MODES.append(Mode)
 from .time import Mode
 MODES.append(Mode)
 
+from .matrix import Mode
+MODES.append(Mode)
+
+from .chasergb import Mode
+MODES.append(Mode)
+
+from .prey import Mode
+MODES.append(Mode)
+
+from .knobulator import Mode
+MODES.append(Mode)
+
 del Mode
