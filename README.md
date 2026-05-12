@@ -6,6 +6,8 @@ display modes.
 
 ![Infinity Mirror](images/mirror.gif?raw=true "Infinity Mirror")
 
+You can find an account of [how the infinity mirror hardware was made](https://www.craig-wood.com/nick/articles/infinity-mirror/) on my blog.
+
 The main files are as follows
 
 - `mirror.py` - the main code to run on the pico
